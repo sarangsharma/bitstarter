@@ -6,19 +6,19 @@ and basic DOM parsing.
 
 References:
 
- + cheerio
-   - https://github.com/MatthewMueller/cheerio
-   - http://encosia.com/cheerio-faster-windows-friendly-alternative-jsdom/
-   - http://maxogden.com/scraping-with-node.html
++ cheerio
+- https://github.com/MatthewMueller/cheerio
+- http://encosia.com/cheerio-faster-windows-friendly-alternative-jsdom/
+- http://maxogden.com/scraping-with-node.html
 
- + commander.js
-   - https://github.com/visionmedia/commander.js
-   - http://tjholowaychuk.com/post/9103188408/commander-js-nodejs-command-line-interfaces-made-easy
++ commander.js
+- https://github.com/visionmedia/commander.js
+- http://tjholowaychuk.com/post/9103188408/commander-js-nodejs-command-line-interfaces-made-easy
 
- + JSON
-   - http://en.wikipedia.org/wiki/JSON
-   - https://developer.mozilla.org/en-US/docs/JSON
-   - https://developer.mozilla.org/en-US/docs/JSON#JSON_in_Firefox_2
++ JSON
+- http://en.wikipedia.org/wiki/JSON
+- https://developer.mozilla.org/en-US/docs/JSON
+- https://developer.mozilla.org/en-US/docs/JSON#JSON_in_Firefox_2
 */
 
 var fs = require('fs');
@@ -30,6 +30,7 @@ var cheerio = require('cheerio');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
 
+
 var assertFileExists = function(infile) {
     var instr = infile.toString();
     if(!fs.existsSync(instr)) {
@@ -40,10 +41,10 @@ var assertFileExists = function(infile) {
 };
 
 var cheerioHtmlFile = function(htmlfile) {
-	if(!fs.existsSync(htmlfile)) {
-   	     //means this is html data from url
-	    return cheerio.load(htmlfile);	 
-	}
+if(!fs.existsSync(htmlfile)) {
+    //means this is html data from url
+return cheerio.load(htmlfile);	
+}
     return cheerio.load(fs.readFileSync(htmlfile));
 };
 
@@ -72,37 +73,36 @@ var checkUrlHtmlFile = function(url,checksfile){
 
 	rest.get(url).on('complete',function(result){
 
-		if(result instanceof Error){
-			sys.puts('Error: '+ result.message);
-			this.retry(5000);
-		}else{
-			console.log("got html data from URL ........");
-			sys.puts(result);
-			return checkHtmlFile(result,checksfile);
-		}
+	if(result instanceof Error){
+		sys.puts('Error: '+ result.message);
+		this.retry(5000);
+	}else{
+		 printCheckJson(checkHtmlFile(result,checksfile));
+	     }
 	});	
 
 }
 
+var printCheckJson = function(checkJson){
+	var outJson = JSON.stringify(checkJson,null,4);
+        console.log(outJson);
+}
+
+
 if(require.main == module) {
-    program
-        .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
-        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-	.option('-u, --urlk <url>', 'URL to resource')
-        .parse(process.argv);
-	
-	if(program.urlk!= null){
-		console.log("URL submitted.....");
-		var checkJson = checkUrlHtmlFile(program.urlk,program.checks);
-		console.log(checkJson);
-		var outJson = JSON.stringify(checkJson, null, 4);
-           	console.log(outJson);			
+    	program
+        	.option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
+        	.option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+		.option('-u, --url <url>', 'URL to resource')
+        	.parse(process.argv);
+
+	if(program.url!= null){
+	 	checkUrlHtmlFile(program.url,program.checks);
 	}else{
-    	   var checkJson = checkHtmlFile(htmldata, program.checks);
-    	   var outJson = JSON.stringify(checkJson, null, 4);
- 	   console.log(outJson);
+     		printCheckJson(checkHtmlFile(program.file, program.checks));
 	}
 
 } else {
-    exports.checkHtmlFile = checkHtmlFile;
+    		exports.checkHtmlFile = checkHtmlFile;
 }
+
